@@ -5,7 +5,7 @@ class StateMachine:
         self.start_state = None
         self.end_states = []
 
-    def add_state(self, name, handler, end_state=0):
+    def add_state(self, name, handler, end_state=False):
         name = name.upper()
         self.handlers[name] = handler
         if end_state:
