@@ -13,13 +13,19 @@ class LexicalAnalyze:
         self.current_char = None
         self.next_char = None
         self.ident_buffer = ""
+        self.value_buffer = ""
         self.tokens = []
+
+        self.regex_operators = re.compile('[+-/*]')
+        self.regex_special = re.compile('[:,;.()\[\]\']')
+
+
 
     def set_current_char(self):
         if self.text:
             if len(self.text) > 1:
-                self.text, self.current_char = \
-                    self.text[1:], self.text[0]
+                self.current_char, self.text,  = \
+                    self.text[0], self.text[1:]
             else:
                 self.current_char, self.text = \
                     self.text[0], ''
@@ -48,12 +54,34 @@ class LexicalAnalyze:
         while self.current_char.isalnum():
             self.ident_buffer += self.current_char
             return "char_state"
+
+        if self.regex_operators.match(self.current_char):
+            print(self.current_char)
+            ##Error here
+            self.tokens.append(token_lib.Token(self.current_char))
+            return "arith_operator_state"
+
+        if self.regex_special.match(self.current_char):
+            self.tokens.append(token_lib.Token(self.current_char))
+            return "char_state"
+
         if self.current_char.isspace():
             self.register_identifier()
             return "white_space_state"
         elif self.current_char == ';':
             self.register_identifier()
             return "expression_end_state"
+
+    def arith_operator_handler(self):
+        self.set_current_char()
+        if self.current_char.isspace:
+            return "white_space_state"
+        elif self.current_char.isalpha():
+            return "char_state"
+        elif self.current_char.isdigit():
+            self.value_buffer += self.current_char
+            return "digit_state"
+
 
     def white_space_handler(self):
         self.set_current_char()
@@ -64,7 +92,8 @@ class LexicalAnalyze:
             if self.current_char.isalpha():
                 self.ident_buffer += self.current_char
                 return "char_state"
-            #elif self.current_char.isdigit():
+            elif self.current_char.isdigit():
+                return ""
 
     def numerical_handler(self):
         pass
@@ -75,11 +104,9 @@ class LexicalAnalyze:
     def register_identifier(self):
         value = self.ident_buffer
         if self.is_reserved(value):
-            token = token_lib.Token(list(terminals.keys())[list(terminals.values()).index(value)]
-                          , value)
+            token = token_lib.Token(value, reserved=True)
         else:
-            token = token_lib.Token(list(terminals.keys())[list(terminals.values()).index('Identifier')],
-                          value)
+            token = token_lib.Token(value)
         self.tokens.append(token)
         self.ident_buffer = ""
 
@@ -92,6 +119,7 @@ class LexicalAnalyze:
         state_machine.set_start("start_state")
         state_machine.add_state("start_state", self.start_handler)
         state_machine.add_state("char_state", self.char_handler)
+        state_machine.add_state("arith_operator_state", self.arith_operator_handler)
         state_machine.add_state("expression_end_state", self.expression_end_handler)
         state_machine.add_state("white_space_state", self.white_space_handler)
         state_machine.add_state("numerical_state", self.numerical_handler)

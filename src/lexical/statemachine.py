@@ -25,7 +25,7 @@ class StateMachine:
         while True:
             #(new_state, cargo) = handler(cargo)
             new_state = handler()
-            print(new_state)
+            #print(new_state)
             if new_state.upper() in self.end_states:
                 print("chegou ao estado", new_state)
                 break
