@@ -25,8 +25,10 @@ class StateMachine:
         while True:
             #(new_state, cargo) = handler(cargo)
             new_state = handler()
-            #print(new_state)
+            print(new_state)
             if new_state.upper() in self.end_states:
+                handler = self.handlers[new_state.upper()]
+                handler()
                 print("chegou ao estado", new_state)
                 break
             else:

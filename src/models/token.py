@@ -11,6 +11,10 @@ class Token:
             self.identifier = list(terminals.keys())[
                 list(terminals.values()).index(value)
             ]
+        elif isinstance(self.value, int):
+            self.identifier = list(terminals.keys())[
+                list(terminals.values()).index("Integer")
+            ]
         else:
             self.identifier = list(terminals.keys())[
                 list(terminals.values()).index("Identifier")
