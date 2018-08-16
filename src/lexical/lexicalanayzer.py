@@ -60,9 +60,7 @@ class LexicalAnalyze:
                 self.tokens.append(token_lib.Token(self.current_char))
                 return "arith_operator_state"
             elif self.current_char in self.binary_operators:
-                self.register_identifier()
-                self.register_number()
-                return "binary_operator_state"
+                return self.binary_helper()
             elif self.current_char in self.specials:
                 self.register_identifier()
                 self.tokens.append(token_lib.Token(self.current_char))
@@ -126,7 +124,9 @@ class LexicalAnalyze:
         else:
             return "end_state"
 
-    def binary_operator_handler(self):
+    def binary_helper(self):
+        self.register_identifier()
+        self.register_number()
         if self.current_char in ['<', '>'] and \
                 self.text[0] in ['=', '>']:
             operator = self.current_char
@@ -135,12 +135,17 @@ class LexicalAnalyze:
             self.tokens.append(token_lib.Token(operator))
         else:
             self.tokens.append(token_lib.Token(self.current_char))
+        return "binary_operator_state"
+
+    def binary_operator_handler(self):
         if self.current_char:
             if self.current_char.isspace():
                 return "white_space_state"
             else:
                 self.ident_buffer += self.current_char
                 return "char_state"
+        else:
+            return "error_state"
 
     def digit_handler(self):
         pass
