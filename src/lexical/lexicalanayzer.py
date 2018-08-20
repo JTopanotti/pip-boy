@@ -16,8 +16,6 @@ class LexicalAnalyze:
         self.handlers = {
             "START_STATE": self.start_handler,
             "CHAR_STATE": self.char_handler,
-            "ARITH_OPERATOR_STATE": self.arith_operator_handler,
-            "BINARY_OPERATOR_STATE": self.binary_operator_handler,
             "SPECIAL_CHAR_STATE": self.special_char_handler,
             "WHITE_SPACE_STATE": self.white_space_handler,
             "DIGIT_STATE": self.digit_handler,
@@ -26,9 +24,7 @@ class LexicalAnalyze:
         self.start_state = "START_STATE"
         self.end_states = ["ERROR_STATE", "END_STATE"]
 
-        self.operators = ["+", "-", "/", "*"]
-        self.binary_operators = ["=", "<", ">"]
-        self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'"]
+        self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'", "=", "<", ">", "+", "-", "/", "*"]
 
     def set_current_char(self):
         if self.text:
@@ -38,6 +34,7 @@ class LexicalAnalyze:
             else:
                 self.current_char, self.text = \
                     self.text[0], ''
+            #print(self.current_char)
         else:
             self.current_char = None
 
@@ -54,32 +51,14 @@ class LexicalAnalyze:
                 self.ident_buffer += self.current_char
                 return "char_state"
 
-            if self.current_char in self.operators:
+            if self.current_char in self.specials:
                 self.register_identifier()
                 self.register_number()
-                self.tokens.append(token_lib.Token(self.current_char))
-                return "arith_operator_state"
-            elif self.current_char in self.binary_operators:
-                return self.binary_helper()
-            elif self.current_char in self.specials:
-                self.register_identifier()
-                self.tokens.append(token_lib.Token(self.current_char))
+                self.special_helper()
                 return "special_char_state"
             elif self.current_char.isspace():
                 self.register_identifier()
                 return "white_space_state"
-        else:
-            return "end_state"
-
-    def arith_operator_handler(self):
-        if self.current_char:
-            if self.current_char.isspace:
-                return "white_space_state"
-            elif self.current_char.isalpha():
-                return "char_state"
-            elif self.current_char.isdigit():
-                self.value_buffer += self.current_char
-                return "digit_state"
         else:
             return "end_state"
 
@@ -92,21 +71,30 @@ class LexicalAnalyze:
                     self.ident_buffer += self.current_char
                     return "char_state"
                 elif self.current_char in self.specials:
-                    self.tokens.append(token_lib.Token(self.current_char))
+                    self.special_helper()
                     return "special_char_state"
-                elif self.current_char in self.operators:
-                    self.register_number()
-                    self.register_identifier()
-                    return "operator_state"
-                elif self.current_char in self.binary_operators:
-                    self.register_number()
-                    self.register_identifier()
-                    return "binary_operator_state"
                 elif self.current_char.isdigit():
                     self.value_buffer += self.current_char
                     return "digit_state"
         else:
             return "end_state"
+
+    def special_helper(self):
+        if self.current_char in ['<', '>'] and \
+                self.text[0] in ['=', '>']:
+            operator = self.current_char
+            self.set_current_char()
+            operator = operator + self.current_char
+            self.tokens.append(token_lib.Token(operator, reserved=True))
+        elif self.current_char == '\'':
+            self.set_current_char()
+            buffer = ''
+            while not self.current_char == '\'':
+                buffer += self.current_char
+                self.set_current_char()
+            self.tokens.append(token_lib.Token(buffer, literal=True))
+        else:
+            self.tokens.append(token_lib.Token(self.current_char, reserved=True))
 
     def special_char_handler(self):
         if self.current_char:
@@ -119,46 +107,42 @@ class LexicalAnalyze:
             elif self.current_char.isspace():
                 return "white_space_state"
             elif self.current_char in self.specials:
-                self.tokens.append(token_lib.Token(self.current_char))
+                self.special_helper()
+                return "special_char_state"
+            else:
+                return "error_state"
+        else:
+            return "end_state"
+
+    def digit_handler(self):
+        if self.current_char:
+            while self.current_char.isdigit():
+                self.value_buffer += self.current_char
+                return "digit_state"
+
+            if self.current_char.isspace():
+                self.register_number()
+                return "white_space_state"
+            elif self.current_char.isalpha():
+                self.register_number()
+                return "char_state"
+            elif self.current_char in self.specials:
+                self.register_number()
+                self.special_helper()
                 return "special_char_state"
         else:
             return "end_state"
 
-    def binary_helper(self):
-        self.register_identifier()
-        self.register_number()
-        if self.current_char in ['<', '>'] and \
-                self.text[0] in ['=', '>']:
-            operator = self.current_char
-            self.set_current_char()
-            operator = operator + self.current_char
-            self.tokens.append(token_lib.Token(operator))
-        else:
-            self.tokens.append(token_lib.Token(self.current_char))
-        return "binary_operator_state"
-
-    def binary_operator_handler(self):
-        if self.current_char:
-            if self.current_char.isspace():
-                return "white_space_state"
-            else:
-                self.ident_buffer += self.current_char
-                return "char_state"
-        else:
-            return "error_state"
-
-    def digit_handler(self):
-        pass
-
     def end_handler(self):
         for token in self.tokens:
-            print(token.value)
+            print(token.value, " : ", token.identifier)
 
     def register_number(self):
         value = self.value_buffer
         if value:
             value = int(value)
             self.tokens.append(token_lib.Token(value))
+            self.value_buffer = ""
 
     def register_identifier(self):
         value = self.ident_buffer
@@ -171,7 +155,7 @@ class LexicalAnalyze:
             self.ident_buffer = ""
 
     def is_reserved(self, identifier):
-        return identifier in terminals.values()
+        return identifier.upper() in terminals.values()
 
     def run(self, text):
         self.text = text.replace('\n', '')
@@ -186,7 +170,7 @@ class LexicalAnalyze:
         while True:
             self.set_current_char()
             new_state = handler()
-            print(new_state)
+            # print(new_state)
             if new_state.upper() in self.end_states:
                 handler = self.handlers[new_state.upper()]
                 handler()
