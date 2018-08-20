@@ -6,7 +6,7 @@ Var
  A :integer;
 Begin
  Readln(a);
- If a=x then
+ If a<>x then
  z:=z+x
  Else begin
  Z:=z-x;
@@ -15,11 +15,15 @@ Begin
  End;
 End;
 Begin
+/* EU SOU UM
+ COMENTARIO INUTIL */
  Z:=0;
  Readln(x,y);
  If x>y then
  Call p
  Else
+ B:= 10 + Z;
+ Y:= 1023;
  Z:=z+x+y;
  Writeln(z);
 End.

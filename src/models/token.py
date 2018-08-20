@@ -13,7 +13,7 @@ class Token:
             ]
         elif isinstance(self.value, int):
             self.identifier = list(terminals.keys())[
-                list(terminals.values()).index("INTEGER")
+                list(terminals.values()).index("INTEIRO")
             ]
         elif literal:
             self.identifier = list(terminals.keys())[

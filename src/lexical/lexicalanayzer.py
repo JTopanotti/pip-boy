@@ -34,7 +34,6 @@ class LexicalAnalyze:
             else:
                 self.current_char, self.text = \
                     self.text[0], ''
-            #print(self.current_char)
         else:
             self.current_char = None
 
@@ -79,9 +78,19 @@ class LexicalAnalyze:
         else:
             return "end_state"
 
+    def skip_comment_char(self):
+        self.current_char, self.text = \
+            self.text[1], self.text[2:]
+
     def special_helper(self):
         if self.current_char in ['<', '>'] and \
                 self.text[0] in ['=', '>']:
+            operator = self.current_char
+            self.set_current_char()
+            operator = operator + self.current_char
+            self.tokens.append(token_lib.Token(operator, reserved=True))
+        elif self.current_char == ':' and \
+                self.text[0] == '=':
             operator = self.current_char
             self.set_current_char()
             operator = operator + self.current_char
@@ -93,6 +102,13 @@ class LexicalAnalyze:
                 buffer += self.current_char
                 self.set_current_char()
             self.tokens.append(token_lib.Token(buffer, literal=True))
+        elif self.current_char == '/' and \
+                self.text[0] == '*':
+            self.skip_comment_char()
+            while self.current_char != '*' and \
+                    self.current_char != '/':
+                self.set_current_char()
+            self.skip_comment_char()
         else:
             self.tokens.append(token_lib.Token(self.current_char, reserved=True))
 
@@ -135,7 +151,7 @@ class LexicalAnalyze:
 
     def end_handler(self):
         for token in self.tokens:
-            print(token.value, " : ", token.identifier)
+            print(token.value, " : ", token.identifier, " : ", terminals[token.identifier])
 
     def register_number(self):
         value = self.value_buffer

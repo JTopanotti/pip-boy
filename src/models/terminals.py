@@ -24,7 +24,7 @@ terminals = {
     23: "AND",
     24: "NOT",
     25: "IDENTIFIER",
-    26: "INTEGER",
+    26: "INTEIRO",
     27: "FOR",
     28: "TO",
     29: "CASE",
