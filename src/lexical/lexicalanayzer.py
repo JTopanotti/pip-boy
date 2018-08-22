@@ -1,11 +1,9 @@
 from builtins import Exception
-import importlib
-
-terminals = importlib.import_module("src.models.terminals").terminals
-token_lib = importlib.import_module("src.models.token")
+from models.terminals import terminals
+from models.token import Token
 
 
-class LexicalAnalyze:
+class LexicalAnalyzer:
 
     def __init__(self):
         self.text = None
@@ -88,20 +86,20 @@ class LexicalAnalyze:
             operator = self.current_char
             self.set_current_char()
             operator = operator + self.current_char
-            self.tokens.append(token_lib.Token(operator, reserved=True))
+            self.tokens.append(Token(operator, reserved=True))
         elif self.current_char == ':' and \
                 self.text[0] == '=':
             operator = self.current_char
             self.set_current_char()
             operator = operator + self.current_char
-            self.tokens.append(token_lib.Token(operator, reserved=True))
+            self.tokens.append(Token(operator, reserved=True))
         elif self.current_char == '\'':
             self.set_current_char()
             buffer = ''
             while not self.current_char == '\'':
                 buffer += self.current_char
                 self.set_current_char()
-            self.tokens.append(token_lib.Token(buffer, literal=True))
+            self.tokens.append(Token(buffer, literal=True))
         elif self.current_char == '/' and \
                 self.text[0] == '*':
             self.skip_comment_char()
@@ -110,7 +108,7 @@ class LexicalAnalyze:
                 self.set_current_char()
             self.skip_comment_char()
         else:
-            self.tokens.append(token_lib.Token(self.current_char, reserved=True))
+            self.tokens.append(Token(self.current_char, reserved=True))
 
     def special_char_handler(self):
         if self.current_char:
@@ -157,16 +155,16 @@ class LexicalAnalyze:
         value = self.value_buffer
         if value:
             value = int(value)
-            self.tokens.append(token_lib.Token(value))
+            self.tokens.append(Token(value))
             self.value_buffer = ""
 
     def register_identifier(self):
         value = self.ident_buffer
         if value:
             if self.is_reserved(value):
-                token = token_lib.Token(value, reserved=True)
+                token = Token(value, reserved=True)
             else:
-                token = token_lib.Token(value)
+                token = Token(value)
             self.tokens.append(token)
             self.ident_buffer = ""
 
@@ -194,9 +192,3 @@ class LexicalAnalyze:
                 break
             else:
                 handler = self.handlers[new_state.upper()]
-
-
-if __name__ == "__main__":
-    analyzer = LexicalAnalyze()
-    f = open('lms.txt', 'r')
-    analyzer.run(f.read())
