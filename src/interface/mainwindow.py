@@ -1,18 +1,33 @@
 import sys
 
-from PyQt5.QtWidgets import QMainWindow, QWidget, QPlainTextEdit, QHBoxLayout, QVBoxLayout, QApplication
+from PyQt5.QtCore import QRect, Qt
+from PyQt5.QtGui import QPainter, QColor, QIcon
+from PyQt5.QtWidgets import QMainWindow, QWidget, QPlainTextEdit, \
+    QHBoxLayout, QApplication, QTableWidget, QTableWidgetItem
+
+lineBarColor = QColor(255, 255, 255)
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
+        self.width = 150
+        self.height = 400
+        self.setWindowIcon(QIcon('resources/pip-boy.png'))
+
         self.editor = QPlainTextEdit()
+        self.editor.setFixedWidth(400)
         self.numberColumn = NumberColumn(self.editor)
+        self.automatonTable = QTableWidget()
+        self.automatonTable.setColumnCount(2)
+        self.automatonTable.setHorizontalHeaderLabels(['Id', 'Palavra'])
+        self.automatonTable.setFixedWidth(200)
 
         layout = QHBoxLayout()
         layout.addWidget(self.numberColumn)
         layout.addWidget(self.editor)
+        layout.addWidget(self.automatonTable)
         container = QWidget()
         container.setLayout(layout)
 
@@ -43,11 +58,37 @@ class NumberColumn(QWidget):
         if self.width() != width:
             self.setFixedWidth(width)
 
+    def paintEvent(self, event):
+        if self.isVisible():
+            block = self.editor.firstVisibleBlock()
+            height = self.fontMetrics().height()
+            number = block.blockNumber()
+            painter = QPainter(self)
+            painter.fillRect(event.rect(), lineBarColor)
+            painter.drawRect(0, 0, event.rect().width() - 1, event.rect().height() - 1)
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    app.setApplicationName("PipBoy")
+            font = painter.font()
 
-    window = MainWindow()
-    # sys.exit(app.exec_())
-    app.exec_()
+            current_block = self.editor.textCursor().block().blockNumber() + 1
+
+            while block.isValid():
+                block_geometry = self.editor.blockBoundingGeometry(block)
+                offset = self.editor.contentOffset()
+                block_top = block_geometry.translated(offset).top()
+                number += 1
+                rect = QRect(0, block_top, self.width() - 5, height)
+
+                if number == current_block:
+                    font.setBold(True)
+                else:
+                    font.setBold(False)
+
+                painter.setFont(font)
+                painter.drawText(rect, Qt.AlignRight, '%i' % number)
+
+                if block_top > event.rect().bottom():
+                    break
+
+                block = block.next()
+
+            painter.end()
