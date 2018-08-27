@@ -10,7 +10,7 @@ Begin
  z:=z+x
  Else begin
  Z:=z-x;
- Y:= 'DAT LITERAL';
+ Y:= 'Um Literal';
  Call p;
  End;
 End;

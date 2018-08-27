@@ -189,6 +189,6 @@ class LexicalAnalyzer:
                 handler = self.handlers[new_state.upper()]
                 handler()
                 print("chegou ao estado", new_state)
-                break
+                return self.tokens
             else:
                 handler = self.handlers[new_state.upper()]

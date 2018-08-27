@@ -3,7 +3,9 @@ import sys
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QPainter, QColor, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QPlainTextEdit, \
-    QHBoxLayout, QApplication, QTableWidget, QTableWidgetItem
+    QHBoxLayout, QApplication, QTableWidget, QTableWidgetItem, QAction
+
+from lexical.lexicalanayzer import LexicalAnalyzer
 
 lineBarColor = QColor(255, 255, 255)
 
@@ -15,6 +17,12 @@ class MainWindow(QMainWindow):
         self.width = 150
         self.height = 400
         self.setWindowIcon(QIcon('resources/pip-boy.png'))
+
+        self.menu = self.menuBar()
+        self.compileAct = QAction('Compile')
+        self.compileAct.triggered.connect(self.compile)
+        self.menu.addAction(self.compileAct)
+        self.lexicalAnalyzer = LexicalAnalyzer()
 
         self.editor = QPlainTextEdit()
         self.editor.setFixedWidth(400)
@@ -35,6 +43,14 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Pip-Boy")
         self.show()
+
+    def compile(self):
+        tokens = self.lexicalAnalyzer.run(self.editor.toPlainText())
+        for token in tokens:
+            row_count = self.automatonTable.rowCount()
+            self.automatonTable.insertRow(row_count)
+            self.automatonTable.setItem(row_count, 0, QTableWidgetItem(str(token.identifier)))
+            self.automatonTable.setItem(row_count, 1, QTableWidgetItem(token.value))
 
 
 class NumberColumn(QWidget):
