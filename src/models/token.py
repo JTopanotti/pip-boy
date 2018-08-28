@@ -1,6 +1,6 @@
 import importlib
 
-terminals = importlib.import_module("src.models.terminals").terminals
+terminals = importlib.import_module("models.terminals").terminals
 
 
 class Token:

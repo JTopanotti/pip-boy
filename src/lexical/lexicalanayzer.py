@@ -12,14 +12,13 @@ class LexicalAnalyzer:
         self.value_buffer = ""
         self.tokens = []
         self.handlers = {
-            "START_STATE": self.start_handler,
             "CHAR_STATE": self.char_handler,
             "SPECIAL_CHAR_STATE": self.special_char_handler,
             "WHITE_SPACE_STATE": self.white_space_handler,
             "DIGIT_STATE": self.digit_handler,
             "END_STATE": self.end_handler
         }
-        self.start_state = "START_STATE"
+        self.start_state = "WHITE_SPACE_STATE"
         self.end_states = ["ERROR_STATE", "END_STATE"]
 
         self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'", "=", "<", ">", "+", "-", "/", "*"]
@@ -34,13 +33,6 @@ class LexicalAnalyzer:
                     self.text[0], ''
         else:
             self.current_char = None
-
-    def start_handler(self):
-        if self.current_char.isalpha():
-            self.ident_buffer += self.current_char
-            return "char_state"
-        else:
-            return "error_state"
 
     def char_handler(self):
         if self.current_char:
@@ -148,6 +140,8 @@ class LexicalAnalyzer:
             return "end_state"
 
     def end_handler(self):
+        if self.ident_buffer:
+            self.register_identifier()
         for token in self.tokens:
             print(token.value, " : ", token.identifier, " : ", terminals[token.identifier])
 
@@ -172,6 +166,8 @@ class LexicalAnalyzer:
         return identifier.upper() in terminals.values()
 
     def run(self, text):
+        if self.tokens:
+            self.tokens = []
         self.text = text.replace('\n', '')
 
         try:
@@ -184,7 +180,7 @@ class LexicalAnalyzer:
         while True:
             self.set_current_char()
             new_state = handler()
-            # print(new_state)
+            print(new_state)
             if new_state.upper() in self.end_states:
                 handler = self.handlers[new_state.upper()]
                 handler()

@@ -1,5 +1,6 @@
 import sys
 
+from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QPainter, QColor, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QPlainTextEdit, \
@@ -19,9 +20,12 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon('resources/pip-boy.png'))
 
         self.menu = self.menuBar()
-        self.compileAct = QAction('Compile')
-        self.compileAct.triggered.connect(self.compile)
-        self.menu.addAction(self.compileAct)
+        self.compile_act = QAction('Compile')
+        self.clear_act = QAction('Clear Table')
+        self.compile_act.triggered.connect(self.compile)
+        self.clear_act.triggered.connect(self.clear_table)
+        self.menu.addAction(self.compile_act)
+        self.menu.addAction(self.clear_act)
         self.lexicalAnalyzer = LexicalAnalyzer()
 
         self.editor = QPlainTextEdit()
@@ -29,8 +33,11 @@ class MainWindow(QMainWindow):
         self.numberColumn = NumberColumn(self.editor)
         self.automatonTable = QTableWidget()
         self.automatonTable.setColumnCount(2)
+        header = self.automatonTable.horizontalHeader()
+        header.setSectionResizeMode(0,  QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         self.automatonTable.setHorizontalHeaderLabels(['Id', 'Palavra'])
-        self.automatonTable.setFixedWidth(200)
+
 
         layout = QHBoxLayout()
         layout.addWidget(self.numberColumn)
@@ -50,8 +57,13 @@ class MainWindow(QMainWindow):
             row_count = self.automatonTable.rowCount()
             self.automatonTable.insertRow(row_count)
             self.automatonTable.setItem(row_count, 0, QTableWidgetItem(str(token.identifier)))
-            self.automatonTable.setItem(row_count, 1, QTableWidgetItem(token.value))
+            self.automatonTable.setItem(row_count, 1, QTableWidgetItem(str(token.value)))
 
+    def clear_table(self):
+        row_count = self.automatonTable.rowCount()
+        while row_count > -1:
+            self.automatonTable.removeRow(row_count)
+            row_count -= 1
 
 class NumberColumn(QWidget):
     def __init__(self, parent=None, index=1):
