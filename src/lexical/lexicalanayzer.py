@@ -20,7 +20,8 @@ class LexicalAnalyzer:
         }
         self.start_state = "WHITE_SPACE_STATE"
         self.end_states = ["ERROR_STATE", "END_STATE"]
-
+        #TODO ..
+        # IMPLEMENTAR TRATAMENTO PARA IDENTIFICADOR '..'
         self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'", "=", "<", ">", "+", "-", "/", "*"]
 
     def set_current_char(self):
