@@ -1,6 +1,5 @@
 productions = {
     (52, 1): ["PROGRAM", "IDENTIFICADOR", ";", "BLOCO", "."],
-
     (53, 2): ["DCLROT", "DCLCONST", "DCLVAR", "DCLPROC", "CORPO"],
     (53, 3): ["DCLROT", "DCLCONST", "DCLVAR", "DCLPROC", "CORPO"],
     (53, 4): ["DCLROT", "DCLCONST", "DCLVAR", "DCLPROC", "CORPO"],
@@ -31,6 +30,25 @@ productions = {
     (60, 25): ["LID", ":", "TIPO", ";", "LDVAR"],
     (61, 8): ["INTEGER"],
     (61, 9): ["ARRAY", "[", "INTEIRO", "..", "INTEIRO", "]", "OF", "INTEGER"],
+    (62, 5): ["PROCEDURE", "IDENTIFICADOR", "DEFPAR", ";", "BLOCO", ";", "DCLPROC"],
+    (62, 6): ["NULL"],
+    (63, 36): ["(", "LID", ":", "INTEGER", ")"],
+    (63, 39): ["NULL"],
+    (64, 6): ["BEGIN", "COMANDO", "REPCOMANDO", "END"],
+    (65, 7): ["NULL"],
+    (65, 47): [";", "COMANDO", "REPCOMANDO"],
+    (66, 6): ["CORPO"],
+    (66, 7): ["NULL"],
+    (66, 11): ["CALL", "IDENTIFICADOR", "PARAMETROS"],
+    (66, 12): ["GOTO", "IDENTIFICADOR"],
+    (66, 13): ["IF", "EXPRESSAO", "THEN", "COMANDO", "ELSEPARTE"],
+    (66, 15): ["NULL"],
+    (66, 16): ["WHILE", "EXPRESSAO", "DO", "COMANDO"],
+    (66, 18): ["REPEAT", "COMANDO", "UNTIL", "EXPRESSAO"],
+    (66, 19): ["NULL"],
+    (66, 20): ["READLN", "(", "VARIAVEL", "REPVARIAVEL", ")"],
+    (66, 21): ["WRITELN", "(", "ITEMSAIDA", "REPITEM", ")"],
+    (66, 25): ["IDENTIFICADOR", "RCOMID"],
 
 
 
