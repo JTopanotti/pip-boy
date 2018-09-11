@@ -20,14 +20,18 @@ class SyntaxicalAnalyzer():
             x = self.expansions[-1]
             a = self.input[0]
 
-            if x in terminals.keys() or x == 51:
+            if x in terminals.keys() or x == 51: #51 = $ / Fim da pilha
                 if x == a:
                     self.expansions.pop()
                     self.input.pop(0)
                 else:
                     raise Exception("Syntax Error")
             else:
-                if productions[(x, a)][0] != "NULL":
-                    pass
+                if productions[(x, a)][0] != 0: #0 = NULL / No productions
+                    self.expansions.pop()
+                    self.expansions += productions[(x, a)]
+                else:
+                    raise Exception("Syntax Error")
+
 
 
