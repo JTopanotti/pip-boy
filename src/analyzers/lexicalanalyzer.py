@@ -20,9 +20,7 @@ class LexicalAnalyzer:
         }
         self.start_state = "WHITE_SPACE_STATE"
         self.end_states = ["ERROR_STATE", "END_STATE"]
-        #TODO ..
-        # IMPLEMENTAR TRATAMENTO PARA IDENTIFICADOR '..'
-        self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'", "=", "<", ">", "+", "-", "/", "*", "..", "_"]
+        self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'", "=", "<", ">", "+", "-", "/", "*"]
 
     def set_current_char(self):
         if self.text:
@@ -37,7 +35,7 @@ class LexicalAnalyzer:
 
     def char_handler(self):
         if self.current_char:
-            while self.current_char.isalnum():
+            while self.current_char.isalnum() or self.current_char == '_':
                 self.ident_buffer += self.current_char
                 return "char_state"
 
@@ -74,6 +72,10 @@ class LexicalAnalyzer:
             self.text[1], self.text[2:]
 
     def special_helper(self):
+        if self.current_char == '.' and \
+                self.text[0] == '.':
+            operator = self.current_char + self.text[0]
+            self.tokens.append(Token(operator, reserved=True))
         if self.current_char in ['<', '>'] and \
                 self.text[0] in ['=', '>']:
             operator = self.current_char
