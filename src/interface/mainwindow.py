@@ -1,12 +1,11 @@
-import sys
-
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QPainter, QColor, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QPlainTextEdit, \
     QHBoxLayout, QApplication, QTableWidget, QTableWidgetItem, QAction
 
-from lexical.lexicalanayzer import LexicalAnalyzer
+from analyzers.lexicalanalyzer import LexicalAnalyzer
+from analyzers.syntaxicalanalyzer import SyntaxicalAnalyzer
 
 lineBarColor = QColor(255, 255, 255)
 
@@ -27,6 +26,7 @@ class MainWindow(QMainWindow):
         self.menu.addAction(self.compile_act)
         self.menu.addAction(self.clear_act)
         self.lexicalAnalyzer = LexicalAnalyzer()
+        self.syntaxicalAnalyzer = SyntaxicalAnalyzer()
 
         self.editor = QPlainTextEdit()
         self.editor.setFixedWidth(400)
@@ -58,6 +58,8 @@ class MainWindow(QMainWindow):
             self.automatonTable.insertRow(row_count)
             self.automatonTable.setItem(row_count, 0, QTableWidgetItem(str(token.identifier)))
             self.automatonTable.setItem(row_count, 1, QTableWidgetItem(str(token.value)))
+
+        self.syntaxicalAnalyzer.run(tokens)
 
     def clear_table(self):
         row_count = self.automatonTable.rowCount()

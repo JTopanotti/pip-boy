@@ -22,7 +22,7 @@ class LexicalAnalyzer:
         self.end_states = ["ERROR_STATE", "END_STATE"]
         #TODO ..
         # IMPLEMENTAR TRATAMENTO PARA IDENTIFICADOR '..'
-        self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'", "=", "<", ">", "+", "-", "/", "*"]
+        self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'", "=", "<", ">", "+", "-", "/", "*", '\n']
 
     def set_current_char(self):
         if self.text:
@@ -169,7 +169,7 @@ class LexicalAnalyzer:
     def run(self, text):
         if self.tokens:
             self.tokens = []
-        self.text = text.replace('\n', '')
+        self.text = text.replace('\n', ' ')
 
         try:
             handler = self.handlers[self.start_state]
