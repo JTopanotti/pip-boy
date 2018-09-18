@@ -72,12 +72,14 @@ class LexicalAnalyzer:
             self.text[1], self.text[2:]
 
     def special_helper(self):
-        if self.current_char == '.' and \
-                self.text[0] == '.':
-            operator = self.current_char
-            self.set_current_char()
-            operator += self.current_char
-            self.tokens.append(Token(operator, reserved=True))
+        if self.current_char == '.':
+            if self.text and self.text[0] == '.':
+                operator = self.current_char
+                self.set_current_char()
+                operator += self.current_char
+                self.tokens.append(Token(operator, reserved=True))
+            else:
+                self.tokens.append(Token(self.current_char, reserved=True))
         elif self.current_char in ['<', '>'] and \
                 self.text[0] in ['=', '>']:
             operator = self.current_char
