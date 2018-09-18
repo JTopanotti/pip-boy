@@ -22,7 +22,7 @@ class LexicalAnalyzer:
         self.end_states = ["ERROR_STATE", "END_STATE"]
         #TODO ..
         # IMPLEMENTAR TRATAMENTO PARA IDENTIFICADOR '..'
-        self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'", "=", "<", ">", "+", "-", "/", "*"]
+        self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'", "=", "<", ">", "+", "-", "/", "*", "..", "_"]
 
     def set_current_char(self):
         if self.text:
@@ -93,13 +93,13 @@ class LexicalAnalyzer:
                 buffer += self.current_char
                 self.set_current_char()
             self.tokens.append(Token(buffer, literal=True))
-        elif self.current_char == '/' and \
+        elif self.current_char == '(' and \
                 self.text[0] == '*':
             self.skip_comment_char()
             while self.current_char != '*' and \
-                    self.current_char != '/':
+                    self.text[0] != ')':
                 self.set_current_char()
-            self.skip_comment_char()
+            self.set_current_char()
         else:
             self.tokens.append(Token(self.current_char, reserved=True))
 
@@ -169,7 +169,7 @@ class LexicalAnalyzer:
     def run(self, text):
         if self.tokens:
             self.tokens = []
-        self.text = text.replace('\n', '')
+        self.text = text.replace('\n',' ').replace('\t',' ')
 
         try:
             handler = self.handlers[self.start_state]

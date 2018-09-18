@@ -6,7 +6,7 @@ from PyQt5.QtGui import QPainter, QColor, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QPlainTextEdit, \
     QHBoxLayout, QApplication, QTableWidget, QTableWidgetItem, QAction
 
-from lexical.lexicalanayzer import LexicalAnalyzer
+from analyzers.lexicalanalyzer import LexicalAnalyzer
 
 lineBarColor = QColor(255, 255, 255)
 
