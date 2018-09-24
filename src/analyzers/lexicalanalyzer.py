@@ -20,9 +20,7 @@ class LexicalAnalyzer:
         }
         self.start_state = "WHITE_SPACE_STATE"
         self.end_states = ["ERROR_STATE", "END_STATE"]
-        #TODO ..
-        # IMPLEMENTAR TRATAMENTO PARA IDENTIFICADOR '..'
-        self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'", "=", "<", ">", "+", "-", "/", "*", '\n']
+        self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'", "=", "<", ">", "+", "-", "/", "*"]
 
     def set_current_char(self):
         if self.text:
@@ -37,7 +35,7 @@ class LexicalAnalyzer:
 
     def char_handler(self):
         if self.current_char:
-            while self.current_char.isalnum():
+            while self.current_char.isalnum() or self.current_char == '_':
                 self.ident_buffer += self.current_char
                 return "char_state"
 
@@ -74,7 +72,15 @@ class LexicalAnalyzer:
             self.text[1], self.text[2:]
 
     def special_helper(self):
-        if self.current_char in ['<', '>'] and \
+        if self.current_char == '.':
+            if self.text and self.text[0] == '.':
+                operator = self.current_char
+                self.set_current_char()
+                operator += self.current_char
+                self.tokens.append(Token(operator, reserved=True))
+            else:
+                self.tokens.append(Token(self.current_char, reserved=True))
+        elif self.current_char in ['<', '>'] and \
                 self.text[0] in ['=', '>']:
             operator = self.current_char
             self.set_current_char()
@@ -93,13 +99,13 @@ class LexicalAnalyzer:
                 buffer += self.current_char
                 self.set_current_char()
             self.tokens.append(Token(buffer, literal=True))
-        elif self.current_char == '/' and \
+        elif self.current_char == '(' and \
                 self.text[0] == '*':
             self.skip_comment_char()
             while self.current_char != '*' and \
-                    self.current_char != '/':
+                    self.text[0] != ')':
                 self.set_current_char()
-            self.skip_comment_char()
+            self.set_current_char()
         else:
             self.tokens.append(Token(self.current_char, reserved=True))
 
@@ -169,7 +175,7 @@ class LexicalAnalyzer:
     def run(self, text):
         if self.tokens:
             self.tokens = []
-        self.text = text.replace('\n', ' ')
+        self.text = text.replace('\n',' ').replace('\t',' ')
 
         try:
             handler = self.handlers[self.start_state]
