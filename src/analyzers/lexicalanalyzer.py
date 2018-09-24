@@ -71,6 +71,7 @@ class LexicalAnalyzer:
         self.current_char, self.text = \
             self.text[1], self.text[2:]
 
+    #TODO tratamento para número negativo
     def special_helper(self):
         if self.current_char == '.':
             if self.text and self.text[0] == '.':
