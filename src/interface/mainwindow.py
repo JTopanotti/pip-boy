@@ -7,6 +7,9 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QPlainTextEdit, \
 from analyzers.lexicalanalyzer import LexicalAnalyzer
 from analyzers.syntaxicalanalyzer import SyntaxicalAnalyzer
 
+from models.terminals import terminals
+from models.nonterminals import non_terminals
+
 lineBarColor = QColor(255, 255, 255)
 
 
@@ -21,28 +24,38 @@ class MainWindow(QMainWindow):
         self.menu = self.menuBar()
         self.compile_act = QAction('Compile')
         self.clear_act = QAction('Clear Table')
+        self.new_derivation_act = QAction('Derivation')
         self.compile_act.triggered.connect(self.compile)
         self.clear_act.triggered.connect(self.clear_table)
+        self.new_derivation_act.triggered.connect(self.new_derivation)
         self.menu.addAction(self.compile_act)
         self.menu.addAction(self.clear_act)
-        self.lexicalAnalyzer = LexicalAnalyzer()
-        self.syntaxicalAnalyzer = SyntaxicalAnalyzer()
+        self.lexical_analyzer = LexicalAnalyzer()
+        self.syntaxical_analyzer = SyntaxicalAnalyzer()
+        self.syntaxical_analyzer.register_action(self.new_derivation_act)
 
         self.editor = QPlainTextEdit()
         self.editor.setFixedWidth(400)
         self.numberColumn = NumberColumn(self.editor)
-        self.automatonTable = QTableWidget()
-        self.automatonTable.setColumnCount(2)
-        header = self.automatonTable.horizontalHeader()
-        header.setSectionResizeMode(0,  QtWidgets.QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        self.automatonTable.setHorizontalHeaderLabels(['Id', 'Palavra'])
+        self.automaton_table = QTableWidget()
+        self.automaton_table.setColumnCount(2)
+        automaton_table_header = self.automaton_table.horizontalHeader()
+        automaton_table_header.setSectionResizeMode(0,  QtWidgets.QHeaderView.ResizeToContents)
+        automaton_table_header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        self.automaton_table.setHorizontalHeaderLabels(['Id', 'Palavra'])
 
+        self.derivation_table = QTableWidget()
+        self.derivation_table.setColumnCount(2)
+        derivation_table_header = self.derivation_table.horizontalHeader()
+        derivation_table_header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        derivation_table_header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        self.derivation_table.setHorizontalHeaderLabels(['Id', 'Simbolo'])
 
         layout = QHBoxLayout()
         layout.addWidget(self.numberColumn)
         layout.addWidget(self.editor)
-        layout.addWidget(self.automatonTable)
+        layout.addWidget(self.automaton_table)
+        layout.addWidget(self.derivation_table)
         container = QWidget()
         container.setLayout(layout)
 
@@ -52,20 +65,40 @@ class MainWindow(QMainWindow):
         self.show()
 
     def compile(self):
-        tokens = self.lexicalAnalyzer.run(self.editor.toPlainText())
+        tokens = self.lexical_analyzer.run(self.editor.toPlainText())
         for token in tokens:
-            row_count = self.automatonTable.rowCount()
-            self.automatonTable.insertRow(row_count)
-            self.automatonTable.setItem(row_count, 0, QTableWidgetItem(str(token.identifier)))
-            self.automatonTable.setItem(row_count, 1, QTableWidgetItem(str(token.value)))
+            row_count = self.automaton_table.rowCount()
+            self.automaton_table.insertRow(row_count)
+            self.automaton_table.setItem(row_count, 0, QTableWidgetItem(str(token.identifier)))
+            self.automaton_table.setItem(row_count, 1, QTableWidgetItem(str(token.value)))
 
-        self.syntaxicalAnalyzer.run(tokens)
+        self.syntaxical_analyzer.run(tokens)
 
     def clear_table(self):
-        row_count = self.automatonTable.rowCount()
+        row_count = self.automaton_table.rowCount()
         while row_count > -1:
-            self.automatonTable.removeRow(row_count)
+            self.automaton_table.removeRow(row_count)
             row_count -= 1
+
+    def new_derivation(self):
+        print(self.syntaxical_analyzer.current_derivation)
+        for input in self.syntaxical_analyzer.input:
+            print(input, )
+        row_count = self.derivation_table.rowCount()
+        while row_count > -1:
+            self.derivation_table.removeRow(row_count)
+            row_count -= 1
+
+        if self.syntaxical_analyzer.expansions:
+            for expansion in self.syntaxical_analyzer.expansions:
+                row_count = self.derivation_table.rowCount()
+                self.derivation_table.insertRow(row_count)
+                self.derivation_table.setItem(row_count, 0, QTableWidgetItem(str(expansion)))
+                if expansion in terminals:
+                    self.derivation_table.setItem(row_count, 1, QTableWidgetItem(str(terminals[expansion])))
+                else:
+                    self.derivation_table.setItem(row_count, 1, QTableWidgetItem(str(non_terminals[expansion])))
+
 
 class NumberColumn(QWidget):
     def __init__(self, parent=None, index=1):
