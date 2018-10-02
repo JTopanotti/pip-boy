@@ -74,20 +74,19 @@ class MainWindow(QMainWindow):
 
         self.syntaxical_analyzer.run(tokens)
 
-    def clear_table(self):
-        row_count = self.automaton_table.rowCount()
+    def clear_table(self, table_name="automaton_table"):
+        table = self.automaton_table if table_name == "automaton_table" else self.derivation_table
+        row_count = table.rowCount()
         while row_count > -1:
-            self.automaton_table.removeRow(row_count)
+            table.removeRow(row_count)
             row_count -= 1
 
     def new_derivation(self):
         print(self.syntaxical_analyzer.current_derivation)
         for input in self.syntaxical_analyzer.input:
             print(input, )
-        row_count = self.derivation_table.rowCount()
-        while row_count > -1:
-            self.derivation_table.removeRow(row_count)
-            row_count -= 1
+
+        self.clear_table("derivation_table")
 
         if self.syntaxical_analyzer.expansions:
             for expansion in self.syntaxical_analyzer.expansions:
