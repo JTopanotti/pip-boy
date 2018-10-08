@@ -25,11 +25,14 @@ class MainWindow(QMainWindow):
         self.compile_act = QAction('Compile')
         self.clear_act = QAction('Clear Table')
         self.new_derivation_act = QAction('Derivation')
+        self.proceed_act = QAction('Proceed')
         self.compile_act.triggered.connect(self.compile)
-        self.clear_act.triggered.connect(self.clear_table)
+        self.clear_act.triggered.connect(lambda: self.clear_table("automaton_table"))
+        self.proceed_act.triggered.connect(self.proceed)
         self.new_derivation_act.triggered.connect(self.new_derivation)
         self.menu.addAction(self.compile_act)
         self.menu.addAction(self.clear_act)
+        self.menu.addAction(self.proceed_act)
         self.lexical_analyzer = LexicalAnalyzer()
         self.syntaxical_analyzer = SyntaxicalAnalyzer()
         self.syntaxical_analyzer.register_action(self.new_derivation_act)
@@ -74,12 +77,17 @@ class MainWindow(QMainWindow):
 
         self.syntaxical_analyzer.run(tokens)
 
-    def clear_table(self, table_name="automaton_table"):
+    def clear_table(self, table_name):
+        print(table_name)
         table = self.automaton_table if table_name == "automaton_table" else self.derivation_table
         row_count = table.rowCount()
         while row_count > -1:
             table.removeRow(row_count)
             row_count -= 1
+
+    def proceed(self):
+        if self.syntaxical_analyzer:
+            self.syntaxical_analyzer.proceed()
 
     def new_derivation(self):
         print(self.syntaxical_analyzer.current_derivation)

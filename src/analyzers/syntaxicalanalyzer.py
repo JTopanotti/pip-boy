@@ -8,9 +8,13 @@ class SyntaxicalAnalyzer():
         #51 = $, 52 = 'PROGRAMA'
         self.expansions = [52, 51]
         self.actions = []
+        self.proceed = True
 
     def register_action(self, action):
         self.actions.append(action)
+
+    def proceed(self):
+        self.proceed = True
 
     def trigger_actions(self):
 
@@ -35,25 +39,26 @@ class SyntaxicalAnalyzer():
 
         while x != 51:
 
-            if x in terminals.keys() or x == 51: #51 = $ / Fim da pilha
-                if x == a:
-                    self.expansions.pop(0)
-                    self.input.pop(0)
+            if self.proceed:
+                if x in terminals.keys() or x == 51: #51 = $ / Fim da pilha
+                    if x == a:
+                        self.expansions.pop(0)
+                        self.input.pop(0)
+                    else:
+                        raise Exception("Erro de Syntax: expansao terminal {} nao encontrado no topo da pilha de tokens".format(x))
                 else:
-                    raise Exception("Erro de Syntax: expansao terminal {} nao encontrado no topo da pilha de tokens".format(x))
-            else:
-                if (x, a) in productions.keys():
-                    self.expansions.pop(0)
-                    if productions[(x, a)][0] != 0: #0 = NULL / No productions
-                        self.expansions = productions[(x, a)] + self.expansions
-                        #print("({0}, {1}) deriva em: {2}".format(x, a, productions[(x, a)]))
-                        self.current_derivation = "({0}, {1}) deriva em: {2}".format(x, a, productions[(x, a)])
-                        self.trigger_actions()
+                    if (x, a) in productions.keys():
+                        self.expansions.pop(0)
+                        if productions[(x, a)][0] != 0: #0 = NULL / No productions
+                            self.expansions = productions[(x, a)] + self.expansions
+                            self.current_derivation = "({0}, {1}) deriva em: {2}".format(x, a, productions[(x, a)])
+                            self.trigger_actions()
 
-                else:
-                    raise Exception("Derivacao para ({}, {}) nao foi encontrado na tabela de parsing".format(x, a))
+                    else:
+                        raise Exception("Derivacao para ({}, {}) nao foi encontrado na tabela de parsing".format(x, a))
 
-            x, a = self.load_variables()
-            print(x)
+                x, a = self.load_variables()
+                print(x)
+                self.proceed = False
 
         self.trigger_actions()
