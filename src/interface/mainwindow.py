@@ -78,7 +78,6 @@ class MainWindow(QMainWindow):
         self.syntaxical_analyzer.run(tokens)
 
     def clear_table(self, table_name):
-        print(table_name)
         table = self.automaton_table if table_name == "automaton_table" else self.derivation_table
         row_count = table.rowCount()
         while row_count > -1:
