@@ -6,12 +6,8 @@ from models.productionsnew import productions
 class SyntaxicalAnalyzer():
     def __init__(self, input=None):
         self.input = input
-        # 51 = $, 52 = 'PROGRAMA'
-        self.expansions = [52, 51]
         self.actions = []
-        self.current_derivation = None
-        self.x = None
-        self.a = None
+        self.clear_cache()
 
     def register_action(self, action):
         self.actions.append(action)
@@ -22,6 +18,14 @@ class SyntaxicalAnalyzer():
     def process_syntax_whole(self):
         while self.x != 51:
             self.process_syntax()
+
+    def clear_cache(self):
+        self.expansions = [52, 51]
+        self.current_derivation = None
+        self.x = None
+        self.a = None
+
+        self.trigger_actions()
 
     def trigger_actions(self):
 

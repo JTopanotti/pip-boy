@@ -96,6 +96,8 @@ class MainWindow(QMainWindow):
         self.clear_table("automaton_table")
         self.clear_table("derivation_table")
 
+        self.syntaxical_analyzer.clear_cache()
+
     def proceed(self):
         try:
             if self.syntaxical_analyzer:
