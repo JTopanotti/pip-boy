@@ -23,12 +23,12 @@ class MainWindow(QMainWindow):
 
         self.menu = self.menuBar()
         self.compile_act = QAction('Compile')
-        self.clear_act = QAction('Clear Table')
+        self.clear_act = QAction('Clear Tables')
         self.new_derivation_act = QAction('Derivation')
         self.proceed_act = QAction('Next')
         self.process_act = QAction('Process Syntax')
         self.compile_act.triggered.connect(self.compile)
-        self.clear_act.triggered.connect(lambda: self.clear_table("automaton_table"))
+        self.clear_act.triggered.connect(self.clear_tables)
         self.proceed_act.triggered.connect(self.proceed)
         self.new_derivation_act.triggered.connect(self.new_derivation)
         self.process_act.triggered.connect(self.process)
@@ -92,13 +92,25 @@ class MainWindow(QMainWindow):
             table.removeRow(row_count)
             row_count -= 1
 
+    def clear_tables(self):
+        self.clear_table("automaton_table")
+        self.clear_table("derivation_table")
+
     def proceed(self):
-        if self.syntaxical_analyzer:
-            self.syntaxical_analyzer.proceed()
+        try:
+            if self.syntaxical_analyzer:
+                self.syntaxical_analyzer.proceed()
+        except Exception as err:
+            self.process_dislpay.setText("Erro: {}".format(err))
+
+
 
     def process(self):
-        if self.syntaxical_analyzer:
-            self.syntaxical_analyzer.process_syntax_whole()
+        try:
+            if self.syntaxical_analyzer:
+                self.syntaxical_analyzer.process_syntax_whole()
+        except Exception as err:
+            self.process_dislpay.setText("Erro: {}".format(err))
 
     def new_derivation(self):
         self.process_dislpay.setText(self.syntaxical_analyzer.current_derivation)
