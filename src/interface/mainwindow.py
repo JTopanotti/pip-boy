@@ -2,7 +2,7 @@ from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtGui import QPainter, QColor, QIcon
 from PyQt5.QtWidgets import QMainWindow, QWidget, QPlainTextEdit, \
-    QHBoxLayout, QApplication, QTableWidget, QTableWidgetItem, QAction
+    QHBoxLayout, QVBoxLayout, QTableWidget, QTableWidgetItem, QAction, QLabel
 
 from analyzers.lexicalanalyzer import LexicalAnalyzer
 from analyzers.syntaxicalanalyzer import SyntaxicalAnalyzer
@@ -25,13 +25,16 @@ class MainWindow(QMainWindow):
         self.compile_act = QAction('Compile')
         self.clear_act = QAction('Clear Table')
         self.new_derivation_act = QAction('Derivation')
-        self.proceed_act = QAction('Proceed')
+        self.proceed_act = QAction('Next')
+        self.process_act = QAction('Process Syntax')
         self.compile_act.triggered.connect(self.compile)
         self.clear_act.triggered.connect(lambda: self.clear_table("automaton_table"))
         self.proceed_act.triggered.connect(self.proceed)
         self.new_derivation_act.triggered.connect(self.new_derivation)
+        self.process_act.triggered.connect(self.process)
         self.menu.addAction(self.compile_act)
         self.menu.addAction(self.clear_act)
+        self.menu.addAction(self.process_act)
         self.menu.addAction(self.proceed_act)
         self.lexical_analyzer = LexicalAnalyzer()
         self.syntaxical_analyzer = SyntaxicalAnalyzer()
@@ -54,11 +57,16 @@ class MainWindow(QMainWindow):
         derivation_table_header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         self.derivation_table.setHorizontalHeaderLabels(['Id', 'Simbolo'])
 
+        layout_vertical = QVBoxLayout()
+        self.process_dislpay = QLabel()
+        layout_vertical.addWidget(self.process_dislpay)
+        layout_vertical.addWidget(self.automaton_table)
+        layout_vertical.addWidget(self.derivation_table)
+
         layout = QHBoxLayout()
         layout.addWidget(self.numberColumn)
         layout.addWidget(self.editor)
-        layout.addWidget(self.automaton_table)
-        layout.addWidget(self.derivation_table)
+        layout.addLayout(layout_vertical)
         container = QWidget()
         container.setLayout(layout)
 
@@ -88,12 +96,15 @@ class MainWindow(QMainWindow):
         if self.syntaxical_analyzer:
             self.syntaxical_analyzer.proceed()
 
+    def process(self):
+        if self.syntaxical_analyzer:
+            self.syntaxical_analyzer.process_syntax_whole()
+
     def new_derivation(self):
-        print(self.syntaxical_analyzer.current_derivation)
-        for input in self.syntaxical_analyzer.input:
-            print(input, )
+        self.process_dislpay.setText(self.syntaxical_analyzer.current_derivation)
 
         self.clear_table("derivation_table")
+        self.clear_table("automaton_table")
 
         if self.syntaxical_analyzer.expansions:
             for expansion in self.syntaxical_analyzer.expansions:
@@ -104,6 +115,13 @@ class MainWindow(QMainWindow):
                     self.derivation_table.setItem(row_count, 1, QTableWidgetItem(str(terminals[expansion])))
                 else:
                     self.derivation_table.setItem(row_count, 1, QTableWidgetItem(str(non_terminals[expansion])))
+
+        if self.syntaxical_analyzer.input:
+            for input_token in self.syntaxical_analyzer.input:
+                row_count = self.automaton_table.rowCount()
+                self.automaton_table.insertRow(row_count)
+                self.automaton_table.setItem(row_count, 0, QTableWidgetItem(str(input_token.identifier)))
+                self.automaton_table.setItem(row_count, 1, QTableWidgetItem(str(input_token.value)))
 
 
 class NumberColumn(QWidget):

@@ -18,6 +18,10 @@ class SyntaxicalAnalyzer():
     def proceed(self):
         self.process_syntax()
 
+    def process_syntax_whole(self):
+        while self.x != 51:
+            self.process_syntax()
+
     def trigger_actions(self):
 
         if self.actions:
