@@ -2,10 +2,11 @@ from builtins import Exception
 from models.terminals import terminals
 from models.productionsnew import productions
 
+
 class SyntaxicalAnalyzer():
     def __init__(self, input=None):
         self.input = input
-        #51 = $, 52 = 'PROGRAMA'
+        # 51 = $, 52 = 'PROGRAMA'
         self.expansions = [52, 51]
         self.actions = []
         self.current_derivation = None
@@ -50,17 +51,16 @@ class SyntaxicalAnalyzer():
             else:
                 if (self.x, self.a) in productions.keys():
                     self.expansions.pop(0)
-                    if productions[(self.x, self.a)][0]:  # 0 = NULL / No productions
-                        expansions = []
-                        for expansion in productions[(self.x, self.a)]:
-                            expansions.append(list(terminals.keys())[list(terminals.values()).index(expansion)])
-                        self.expansions = expansions + self.expansions
-                        self.current_derivation = "({0}, {1}) deriva em: {2}".format(self.x, self.a, productions[(self.x, self.a)])
+                    if productions[(self.x, self.a)][0] != 0:  # 0 = NULL / No productions
+                        self.expansions = productions[(self.x, self.a)] + self.expansions
+                        self.current_derivation = "({0}, {1}) deriva em: {2}".format(self.x, self.a,
+                                                                                     productions[(self.x, self.a)])
                         self.trigger_actions()
-    
+
                 else:
-                    raise Exception("Derivacao para ({}, {}) nao foi encontrado na tabela de parsing".format(self.x, self.a))
-    
+                    raise Exception(
+                        "Derivacao para ({}, {}) nao foi encontrado na tabela de parsing".format(self.x, self.a))
+
             self.load_variables()
             print(self.x)
         else:
