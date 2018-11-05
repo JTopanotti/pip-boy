@@ -10,6 +10,7 @@ class LexicalAnalyzer:
         self.current_char = None
         self.ident_buffer = ""
         self.value_buffer = ""
+        self.error = ""
         self.tokens = []
         self.handlers = {
             "CHAR_STATE": self.char_handler,
@@ -19,7 +20,8 @@ class LexicalAnalyzer:
             "END_STATE": self.end_handler
         }
         self.start_state = "WHITE_SPACE_STATE"
-        self.end_states = ["ERROR_STATE", "END_STATE"]
+        self.end_state = "END_STATE"
+        self.error_state = "ERROR_STATE"
         self.specials = [":", ";", ",", ".", "(", ")", "[", "]", "\'", "=", "<", ">", "+", "-", "/", "*"]
 
     def set_current_char(self):
@@ -59,7 +61,8 @@ class LexicalAnalyzer:
                     self.ident_buffer += self.current_char
                     return "char_state"
                 elif self.current_char in self.specials:
-                    self.special_helper()
+                    if self.special_helper() == "error_state":
+                        return "error_state"
                     return "special_char_state"
                 elif self.current_char.isdigit():
                     self.value_buffer += self.current_char
@@ -106,9 +109,12 @@ class LexicalAnalyzer:
         elif self.current_char == '(' and \
                 self.text[0] == '*':
             self.skip_comment_char()
-            while self.current_char != '*' and \
-                    self.text[0] != ')':
+            while (self.current_char != '*') and \
+                    (self.text[0] != ')'):
                 self.set_current_char()
+                if not self.text:
+                    self.error = "Comentário não finalizado"
+                    return "error_state"
             self.set_current_char()
         else:
             self.tokens.append(Token(self.current_char, reserved=True))
@@ -185,17 +191,21 @@ class LexicalAnalyzer:
             handler = self.handlers[self.start_state]
         except:
             raise Exception("Precisa chamar .set_start() antes de .run()")
-        if not self.end_states:
+        if not self.end_state:
             raise Exception("Pelo menos um estado final deve existir")
 
         while True:
             self.set_current_char()
             new_state = handler()
             print(new_state)
-            if new_state.upper() in self.end_states:
+            if new_state.upper() == self.end_state:
                 handler = self.handlers[new_state.upper()]
                 handler()
                 print("chegou ao estado", new_state)
+                return self.tokens
+            elif new_state.upper() == self.error_state:
+                print("ERRO: " + self.error)
+                self.tokens = self.error
                 return self.tokens
             else:
                 handler = self.handlers[new_state.upper()]

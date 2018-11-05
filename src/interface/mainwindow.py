@@ -77,13 +77,16 @@ class MainWindow(QMainWindow):
 
     def compile(self):
         tokens = self.lexical_analyzer.run(self.editor.toPlainText())
-        for token in tokens:
-            row_count = self.automaton_table.rowCount()
-            self.automaton_table.insertRow(row_count)
-            self.automaton_table.setItem(row_count, 0, QTableWidgetItem(str(token.identifier)))
-            self.automaton_table.setItem(row_count, 1, QTableWidgetItem(str(token.value)))
+        if isinstance(tokens, str):
+            self.process_dislpay.setText("Erro: " + tokens)
+        else:
+            for token in tokens:
+                row_count = self.automaton_table.rowCount()
+                self.automaton_table.insertRow(row_count)
+                self.automaton_table.setItem(row_count, 0, QTableWidgetItem(str(token.identifier)))
+                self.automaton_table.setItem(row_count, 1, QTableWidgetItem(str(token.value)))
 
-        self.syntaxical_analyzer.run(tokens)
+            self.syntaxical_analyzer.run(tokens)
 
     def clear_table(self, table_name):
         table = self.automaton_table if table_name == "automaton_table" else self.derivation_table
