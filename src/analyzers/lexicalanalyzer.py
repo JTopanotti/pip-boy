@@ -204,8 +204,6 @@ class LexicalAnalyzer:
                 print("chegou ao estado", new_state)
                 return self.tokens
             elif new_state.upper() == self.error_state:
-                print("ERRO: " + self.error)
-                self.tokens = self.error
-                return self.tokens
+                raise Exception("Comentário não finalizado")
             else:
                 handler = self.handlers[new_state.upper()]

@@ -58,8 +58,8 @@ class MainWindow(QMainWindow):
         self.derivation_table.setHorizontalHeaderLabels(['Id', 'Simbolo'])
 
         layout_vertical = QVBoxLayout()
-        self.process_dislpay = QLabel()
-        layout_vertical.addWidget(self.process_dislpay)
+        self.process_display = QLabel()
+        layout_vertical.addWidget(self.process_display)
         layout_vertical.addWidget(self.automaton_table)
         layout_vertical.addWidget(self.derivation_table)
 
@@ -76,10 +76,9 @@ class MainWindow(QMainWindow):
         self.show()
 
     def compile(self):
-        tokens = self.lexical_analyzer.run(self.editor.toPlainText())
-        if isinstance(tokens, str):
-            self.process_dislpay.setText("Erro: " + tokens)
-        else:
+        try:
+            tokens = self.lexical_analyzer.run(self.editor.toPlainText())
+
             for token in tokens:
                 row_count = self.automaton_table.rowCount()
                 self.automaton_table.insertRow(row_count)
@@ -87,6 +86,8 @@ class MainWindow(QMainWindow):
                 self.automaton_table.setItem(row_count, 1, QTableWidgetItem(str(token.value)))
 
             self.syntaxical_analyzer.run(tokens)
+        except Exception as err:
+            self.process_display.setText("Erro: {}".format(err))
 
     def clear_table(self, table_name):
         table = self.automaton_table if table_name == "automaton_table" else self.derivation_table
@@ -106,7 +107,7 @@ class MainWindow(QMainWindow):
             if self.syntaxical_analyzer:
                 self.syntaxical_analyzer.proceed()
         except Exception as err:
-            self.process_dislpay.setText("Erro: {}".format(err))
+            self.process_display.setText("Erro: {}".format(err))
 
 
 
@@ -115,10 +116,10 @@ class MainWindow(QMainWindow):
             if self.syntaxical_analyzer:
                 self.syntaxical_analyzer.process_syntax_whole()
         except Exception as err:
-            self.process_dislpay.setText("Erro: {}".format(err))
+            self.process_display.setText("Erro: {}".format(err))
 
     def new_derivation(self):
-        self.process_dislpay.setText(self.syntaxical_analyzer.current_derivation)
+        self.process_display.setText(self.syntaxical_analyzer.current_derivation)
 
         self.clear_table("derivation_table")
         self.clear_table("automaton_table")
