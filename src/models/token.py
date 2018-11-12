@@ -5,7 +5,7 @@ terminals = importlib.import_module("models.terminals").terminals
 
 class Token:
 
-    def __init__(self, value, reserved=False, literal=False):
+    def __init__(self, value, reserved=False, literal=False, line=None, scope=None):
         self.value = value
         if reserved:
             self.identifier = list(terminals.keys())[

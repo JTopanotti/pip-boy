@@ -7,6 +7,8 @@ class LexicalAnalyzer:
 
     def __init__(self):
         self.text = None
+        self.text_lined = {}
+        self.current_line = 1
         self.current_char = None
         self.ident_buffer = ""
         self.value_buffer = ""
@@ -185,7 +187,10 @@ class LexicalAnalyzer:
     def run(self, text):
         if self.tokens:
             self.tokens = []
-        self.text = text.replace('\n',' ').replace('\t',' ')
+        self.text = text.replace('\t',' ').replace('\n', ' ')
+        text_divided = text.replace('\t',' ').split('\n')
+        for i, line in enumerate(text_divided):
+            self.text_lined[i + 1] = line
 
         try:
             handler = self.handlers[self.start_state]
