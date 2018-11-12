@@ -7,6 +7,11 @@ class Token:
 
     def __init__(self, value, reserved=False, literal=False, line=None, scope=None):
         self.value = value
+        self.reserved = reserved
+        self.literal = literal
+        self.line = line
+        self.scope = scope
+
         if reserved:
             self.identifier = list(terminals.keys())[
                 list(terminals.values()).index(value.upper())

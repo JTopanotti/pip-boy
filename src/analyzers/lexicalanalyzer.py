@@ -9,6 +9,7 @@ class LexicalAnalyzer:
         self.text = None
         self.text_lined = {}
         self.current_line = 1
+        self.current_scope = 0
         self.current_char = None
         self.ident_buffer = ""
         self.value_buffer = ""
@@ -36,6 +37,14 @@ class LexicalAnalyzer:
                     self.text[0], ''
         else:
             self.current_char = None
+            
+    def append_token_list(self, token):
+        if self.text_lined:
+            if token.value in self.text_lined[self.current_line]:
+                self.text_lined[self.current_line].replace(token.value, '', 1)
+
+            token.line = self.current_line
+        
 
     def char_handler(self):
         if self.current_char:
@@ -86,28 +95,28 @@ class LexicalAnalyzer:
                 operator = self.current_char
                 self.set_current_char()
                 operator += self.current_char
-                self.tokens.append(Token(operator, reserved=True))
+                self.append_token_list(Token(operator, reserved=True))
             else:
-                self.tokens.append(Token(self.current_char, reserved=True))
+                self.append_token_list(Token(self.current_char, reserved=True))
         elif self.current_char in ['<', '>'] and \
                 self.text[0] in ['=', '>']:
             operator = self.current_char
             self.set_current_char()
             operator = operator + self.current_char
-            self.tokens.append(Token(operator, reserved=True))
+            self.append_token_list(Token(operator, reserved=True))
         elif self.current_char == ':' and \
                 self.text[0] == '=':
             operator = self.current_char
             self.set_current_char()
             operator = operator + self.current_char
-            self.tokens.append(Token(operator, reserved=True))
+            self.append_token_list(Token(operator, reserved=True))
         elif self.current_char == '\'':
             self.set_current_char()
             buffer = ''
             while not self.current_char == '\'':
                 buffer += self.current_char
                 self.set_current_char()
-            self.tokens.append(Token(buffer, literal=True))
+            self.append_token_list(Token(buffer, literal=True))
         elif self.current_char == '(' and \
                 self.text[0] == '*':
             self.skip_comment_char()
@@ -119,7 +128,7 @@ class LexicalAnalyzer:
                     return "error_state"
             self.set_current_char()
         else:
-            self.tokens.append(Token(self.current_char, reserved=True))
+            self.append_token_list(Token(self.current_char, reserved=True))
 
     def special_char_handler(self):
         if self.current_char:
@@ -168,7 +177,7 @@ class LexicalAnalyzer:
         value = self.value_buffer
         if value:
             value = int(value)
-            self.tokens.append(Token(value))
+            self.append_token_list(Token(value))
             self.value_buffer = ""
 
     def register_identifier(self):
@@ -178,7 +187,7 @@ class LexicalAnalyzer:
                 token = Token(value, reserved=True)
             else:
                 token = Token(value)
-            self.tokens.append(token)
+            self.append_token_list(token)
             self.ident_buffer = ""
 
     def is_reserved(self, identifier):
