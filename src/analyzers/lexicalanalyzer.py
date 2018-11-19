@@ -39,11 +39,24 @@ class LexicalAnalyzer:
             self.current_char = None
             
     def append_token_list(self, token):
+
+        while not self.text_lined[self.current_line].strip():
+            del self.text_lined[self.current_line]
+            self.current_line += 1
+
         if self.text_lined:
-            if token.value in self.text_lined[self.current_line]:
-                self.text_lined[self.current_line].replace(token.value, '', 1)
+            if str(token.value) in self.text_lined[self.current_line]:
+                line = self.text_lined[self.current_line]
+                token_value = token.value
+
+                if token.literal:
+                    token_value = "\'{}\'".format(token_value)
+
+                self.text_lined[self.current_line] = \
+                        line.replace(str(token_value), '', 1)
 
             token.line = self.current_line
+            self.tokens.append(token)
         
 
     def char_handler(self):
@@ -198,8 +211,21 @@ class LexicalAnalyzer:
             self.tokens = []
         self.text = text.replace('\t',' ').replace('\n', ' ')
         text_divided = text.replace('\t',' ').split('\n')
-        for i, line in enumerate(text_divided):
-            self.text_lined[i + 1] = line
+        for key, line in enumerate(text_divided):
+            self.text_lined[key + 1] = line
+
+        #Limpar comentários do dicionario
+        for key in range(1, max(self.text_lined.keys()) + 1):
+            if '(*' in self.text_lined[key]:
+                for commented in range(key, max(self.text_lined.keys()) + 1):
+                    text = self.text_lined[commented]
+                    self.text_lined[commented] = ''
+                    if '*)' in text:
+                        break
+
+
+
+
 
         try:
             handler = self.handlers[self.start_state]
