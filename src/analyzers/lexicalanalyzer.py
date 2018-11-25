@@ -10,6 +10,7 @@ class LexicalAnalyzer:
         self.text_lined = {}
         self.current_line = 1
         self.current_scope = 0
+        self.scope_counter = 0
         self.current_char = None
         self.ident_buffer = ""
         self.value_buffer = ""
@@ -44,6 +45,13 @@ class LexicalAnalyzer:
             del self.text_lined[self.current_line]
             self.current_line += 1
 
+        if token.identifier == 5: #PROCEDURE
+            self.scope_counter += 1
+            self.current_scope = self.scope_counter
+
+        if token.identifier == 7 and self.current_scope > 0: #END
+            self.current_scope = 0
+
         if self.text_lined:
             if str(token.value) in self.text_lined[self.current_line]:
                 line = self.text_lined[self.current_line]
@@ -56,6 +64,7 @@ class LexicalAnalyzer:
                         line.replace(str(token_value), '', 1)
 
             token.line = self.current_line
+            token.scope = self.current_scope
             self.tokens.append(token)
         
 
