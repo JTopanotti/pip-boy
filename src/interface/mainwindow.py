@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon('resources/pip-boy.png'))
 
         self.menu = self.menuBar()
-        self.compile_act = QAction('Compile')
+        self.compile_act = QAction('Tokenize')
         self.clear_act = QAction('Clear Tables')
         self.new_derivation_act = QAction('Derivation')
         self.proceed_act = QAction('Next')
@@ -76,7 +76,7 @@ class MainWindow(QMainWindow):
         self.show()
 
     def compile(self):
-        # try:
+         try:
             tokens = self.lexical_analyzer.run(self.editor.toPlainText())
 
             for token in tokens:
@@ -86,8 +86,8 @@ class MainWindow(QMainWindow):
                 self.automaton_table.setItem(row_count, 1, QTableWidgetItem(str(token.value)))
 
             self.syntaxical_analyzer.run(tokens)
-        # except Exception as err:
-        #     self.process_display.setText("Erro: {}".format(err))
+         except Exception as err:
+             self.process_display.setText("Erro: {}".format(err))
 
     def clear_table(self, table_name):
         table = self.automaton_table if table_name == "automaton_table" else self.derivation_table

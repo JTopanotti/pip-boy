@@ -1,6 +1,9 @@
 from builtins import Exception
+
 from models.terminals import terminals
 from models.productionsnew import productions
+from models.semanticflags import semanticflags
+from analyzers.semanticalanalyzer import SemanticalAnalyzer
 
 
 class SyntaxicalAnalyzer():
@@ -8,6 +11,7 @@ class SyntaxicalAnalyzer():
         self.input = input
         self.actions = []
         self.clear_cache()
+        self.semanticalanalyzer = SemanticalAnalyzer()
 
     def register_action(self, action):
         self.actions.append(action)
@@ -47,11 +51,18 @@ class SyntaxicalAnalyzer():
         if self.x != 51:
             if self.x in terminals.keys() or self.x == 51:  # 51 = $ / Fim da pilha
                 if self.x == self.a:
+                    if self.x in semanticflags.keys():
+                        input = self.input.copy()
+                        try:
+                            self.semanticalanalyzer.declare(input)
+                        except Exception as err:
+                            raise Exception(err)
                     self.expansions.pop(0)
                     self.input.pop(0)
+                    pass
                 else:
                     raise Exception(
-                        "Erro de Syntax: expansao terminal {} nao encontrado no topo da pilha de tokens".format(self.x))
+                        "Erro de Sintaxe: expansao terminal {} nao encontrado no topo da pilha de tokens".format(self.x))
             else:
                 if (self.x, self.a) in productions.keys():
                     self.expansions.pop(0)
@@ -60,7 +71,6 @@ class SyntaxicalAnalyzer():
                         self.current_derivation = "({0}, {1}) deriva em: {2}".format(self.x, self.a,
                                                                                      productions[(self.x, self.a)])
                         self.trigger_actions()
-
                 else:
                     raise Exception(
                         "Derivacao para ({}, {}) nao foi encontrado na tabela de parsing".format(self.x, self.a))

@@ -40,7 +40,6 @@ class LexicalAnalyzer:
             self.current_char = None
             
     def append_token_list(self, token):
-
         while not self.text_lined[self.current_line].strip():
             del self.text_lined[self.current_line]
             self.current_line += 1
@@ -232,10 +231,6 @@ class LexicalAnalyzer:
                     if '*)' in text:
                         break
 
-
-
-
-
         try:
             handler = self.handlers[self.start_state]
         except:
@@ -251,8 +246,9 @@ class LexicalAnalyzer:
                 handler = self.handlers[new_state.upper()]
                 handler()
                 print("chegou ao estado", new_state)
+                self.current_line = 1
                 return self.tokens
             elif new_state.upper() == self.error_state:
-                raise Exception("Comentário não finalizado")
+                raise Exception(self.error)
             else:
                 handler = self.handlers[new_state.upper()]
