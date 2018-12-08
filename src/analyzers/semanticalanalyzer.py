@@ -20,23 +20,30 @@ class SemanticalAnalyzer():
             input.pop(0)
             while input[0].identifier not in (semanticdeclarations.keys() or 6):
                 if self.input[0].identifier in semantictypes.keys():
+                    x = self.input[0].identifier
+                    if self.input[0].identifier == 9:
+                        self.input.pop(0)
+                        while self.input[0].identifier not in semantictypes.keys():
+                            self.input.pop(0)
+                        self.input.pop(0)
                     for var in var_list:
-                        var.type = self.input[0].identifier
+                        var.type = x
                         self.insert_check(var)
                         self.symbols.append(var)
+                    var_list.clear()
                 elif self.input[0].identifier == 25:
                     symbol = Symbol()
                     symbol.name = self.input[0].value
                     symbol.scope = self.input[0].scope
-                    self.insert_check(symbol)
-                    self.symbols.append(symbol)
-                    if category == [2, 3]:
+                    if category in [2,3]:
                         symbol.category = category
                         if category == 3:
                             symbol.type = 8
                     elif category == 4:
                         symbol.category = category
                         var_list.append(symbol)
+                        self.input.pop(0)
+                        continue
                     self.insert_check(symbol)
                     self.symbols.append(symbol)
                 else:
@@ -49,7 +56,7 @@ class SemanticalAnalyzer():
     def insert_check(self, symbol):
         for s in self.symbols:
             if symbol == s:
-                raise Exception("{0} {1} na linha {2} duplicado".format(semanticdeclarations.get(symbol.type),
+                raise Exception("{0} {1} na linha {2} duplicado".format(semanticdeclarations.get(symbol.category),
                                                                         self.input[0].value, self.input[0].line))
             else:
                 pass

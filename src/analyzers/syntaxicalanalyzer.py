@@ -2,7 +2,7 @@ from builtins import Exception
 
 from models.terminals import terminals
 from models.productionsnew import productions
-from models.semanticflags import semanticflags
+from models.semanticflags import semanticdeclarations
 from analyzers.semanticalanalyzer import SemanticalAnalyzer
 
 
@@ -51,7 +51,7 @@ class SyntaxicalAnalyzer():
         if self.x != 51:
             if self.x in terminals.keys() or self.x == 51:  # 51 = $ / Fim da pilha
                 if self.x == self.a:
-                    if self.x in semanticflags.keys():
+                    if self.x in semanticdeclarations.keys():
                         input = self.input.copy()
                         try:
                             self.semanticalanalyzer.declare(input)
