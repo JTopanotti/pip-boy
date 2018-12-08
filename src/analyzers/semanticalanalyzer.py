@@ -14,11 +14,13 @@ class SemanticalAnalyzer():
             self.input = input
             category = input[0].identifier
             var_list = []
+            isparam = False
+            self.scope = 0
         else:
             raise Exception("Lista de símbolos inválida")
         try:
             input.pop(0)
-            while input[0].identifier not in (semanticdeclarations.keys() or 6):
+            while input[0].identifier not in semanticdeclarations.keys() or input[0].identifier != 6 :
                 if self.input[0].identifier in semantictypes.keys():
                     x = self.input[0].identifier
                     if self.input[0].identifier == 9:
@@ -44,11 +46,18 @@ class SemanticalAnalyzer():
                         var_list.append(symbol)
                         self.input.pop(0)
                         continue
+                    elif category == 5:
+                        if isparam:
+                            symbol.category = 4
+                            var_list.append(symbol)
+                            self.input.pop(0)
+                            continue
+                        else:
+                            symbol.category = category
+                            isparam = True
+                        pass
                     self.insert_check(symbol)
                     self.symbols.append(symbol)
-                else:
-                    #TODO: Declaração de Procedure
-                    pass
                 self.input.pop(0)
         except Exception as err:
             raise Exception(err)

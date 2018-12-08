@@ -7,5 +7,5 @@ semanticdeclarations = {
 
 semantictypes = {
     8: "INTEGER",
-    9: "ARRAY"
+    9: "ARRAY",
 }
