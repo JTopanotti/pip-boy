@@ -2,8 +2,6 @@ from builtins import Exception
 
 from models.terminals import terminals
 from models.productionsnew import productions
-from models.semanticflags import semanticdeclarations
-from analyzers.semanticalanalyzer import SemanticalAnalyzer
 
 
 class SyntaxicalAnalyzer():
@@ -11,7 +9,6 @@ class SyntaxicalAnalyzer():
         self.input = input
         self.actions = []
         self.clear_cache()
-        self.semanticalanalyzer = SemanticalAnalyzer()
 
     def register_action(self, action):
         self.actions.append(action)
@@ -51,12 +48,6 @@ class SyntaxicalAnalyzer():
         if self.x != 51:
             if self.x in terminals.keys() or self.x == 51:  # 51 = $ / Fim da pilha
                 if self.x == self.a:
-                    if self.x in semanticdeclarations.keys():
-                        input = self.input.copy()
-                        try:
-                            self.semanticalanalyzer.declare(input)
-                        except Exception as err:
-                            raise Exception(err)
                     self.expansions.pop(0)
                     self.input.pop(0)
                     pass

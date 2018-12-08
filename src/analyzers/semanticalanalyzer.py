@@ -19,8 +19,9 @@ class SemanticalAnalyzer():
         else:
             raise Exception("Lista de símbolos inválida")
         try:
+            self.remove_scope()
             input.pop(0)
-            while input[0].identifier not in semanticdeclarations.keys() or input[0].identifier != 6 :
+            while (input[0].identifier not in semanticdeclarations.keys()) and (input[0].identifier != 6) :
                 if self.input[0].identifier in semantictypes.keys():
                     x = self.input[0].identifier
                     if self.input[0].identifier == 9:
@@ -47,6 +48,7 @@ class SemanticalAnalyzer():
                         self.input.pop(0)
                         continue
                     elif category == 5:
+                        self.scope = self.input[0].scope
                         if isparam:
                             symbol.category = 4
                             var_list.append(symbol)
@@ -66,8 +68,24 @@ class SemanticalAnalyzer():
         for s in self.symbols:
             if symbol == s:
                 raise Exception("{0} {1} na linha {2} duplicado".format(semanticdeclarations.get(symbol.category),
-                                                                        self.input[0].value, self.input[0].line))
+                                                                        symbol.name, self.input[0].line))
             else:
                 pass
+
+    def remove_scope(self):
+        for s in self.symbols:
+            print("Index {}".format(self.symbols.index(s)))
+            if s.scope > self.scope:
+                self.symbols.pop()
+
+    def run(self, input):
+
+        while input:
+            if input[0].identifier in semanticdeclarations.keys():
+                try:
+                    self.declare(input)
+                except Exception as err:
+                    raise Exception(err)
+            input.pop(0)
 
     #TODO: Verificação de variável declarada

@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QPlainTextEdit, \
 
 from analyzers.lexicalanalyzer import LexicalAnalyzer
 from analyzers.syntaxicalanalyzer import SyntaxicalAnalyzer
+from analyzers.semanticalanalyzer import SemanticalAnalyzer
 
 from models.terminals import terminals
 from models.nonterminals import non_terminals
@@ -16,6 +17,8 @@ lineBarColor = QColor(255, 255, 255)
 class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
+
+        self.tokens = []
 
         self.width = 150
         self.height = 400
@@ -39,6 +42,7 @@ class MainWindow(QMainWindow):
         self.lexical_analyzer = LexicalAnalyzer()
         self.syntaxical_analyzer = SyntaxicalAnalyzer()
         self.syntaxical_analyzer.register_action(self.new_derivation_act)
+        self.semantical_analyzer = SemanticalAnalyzer()
 
         self.editor = QPlainTextEdit()
         self.editor.setFixedWidth(400)
@@ -78,7 +82,7 @@ class MainWindow(QMainWindow):
     def compile(self):
          try:
             tokens = self.lexical_analyzer.run(self.editor.toPlainText())
-
+            self.tokens = tokens.copy()
             for token in tokens:
                 row_count = self.automaton_table.rowCount()
                 self.automaton_table.insertRow(row_count)
@@ -109,12 +113,11 @@ class MainWindow(QMainWindow):
         except Exception as err:
             self.process_display.setText("Erro: {}".format(err))
 
-
-
     def process(self):
         try:
             if self.syntaxical_analyzer:
                 self.syntaxical_analyzer.process_syntax_whole()
+                self.semantical_analyzer.run(self.tokens)
         except Exception as err:
             self.process_display.setText("Erro: {}".format(err))
 
