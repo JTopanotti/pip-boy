@@ -10,7 +10,7 @@ class Symbol:
         self.type = None
         self.scope = None
         self.category = None
+        self.line = None
 
     def __eq__(self, other):
-        return self.name == other.name and self.type == other.type and self.scope == other.scope \
-            and self.category == other.category
+        return self.name == other.name and self.scope == other.scope
