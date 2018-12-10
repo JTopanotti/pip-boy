@@ -11,8 +11,6 @@ class SemanticalAnalyzer:
         self.scope = 0
 
     def declaration_handler(self):
-        self.clear_scope()
-
         var_table = []
         category = self.input[0].identifier
         isparam = False
@@ -52,7 +50,6 @@ class SemanticalAnalyzer:
                     else:
                         self.scope = self.input[0].scope
                         symbol.category = category
-                        # symbol.scope = 0
                         self.include(symbol)
                         isparam = True
             self.input.pop(0)
@@ -76,25 +73,29 @@ class SemanticalAnalyzer:
         for s in self.symbol_table:
             if s.category in [5, 6]:
                 temp.append(s)
-            if s.scope <= self.scope:
+            elif s.scope <= self.scope:
                 temp.append(s)
         self.symbol_table = temp
 
     def include(self, symbol):
         if self.symbol_table:
             for s in self.symbol_table:
-                if s.name == symbol.name and s.scope == symbol.scope:
-                    raise Exception("{0} '{1}' na linha {2} duplicado".format(semanticdeclarations.get(symbol.category),
-                                                                            symbol.name, symbol.line))
+                if symbol.category == 5:
+                    if s.name == symbol.name:
+                        raise Exception(
+                            "{0} '{1}' na linha {2} duplicado".format(semanticdeclarations.get(symbol.category),
+                                                                      symbol.name, symbol.line))
+                elif s.name == symbol.name and s.scope == symbol.scope:
+                    raise Exception("{0} '{1}' na linha {2} duplicado". format(semanticdeclarations.get(symbol.category),
+                                                                              symbol.name, symbol.line))
             self.symbol_table.append(symbol)
         else:
             self.symbol_table.append(symbol)
 
     def body_handler(self):
         while self.input[0].identifier != 7:
-
             if self.input[0].identifier == 25:
-                s = self.is_declared(self.input[0])
+                s = self.is_declared(self.input[0], 4)
                 type = None
                 line = self.input[0].line
                 if self.input[1].identifier == 38:
@@ -102,53 +103,62 @@ class SemanticalAnalyzer:
                         raise Exception("Atribuição de valor em constante na linha {}".format(self.input[0].line))
                     expression = self.pop_line()
                     expression.pop(0)
-                    type = self.is_valid(expression)
+                    type = self.is_valid(expression, False)
                     if s.type != type:
                         raise Exception("Operação retornou tipo '{0}', esperado tipo '{1}' na linha {2}".format(type,
-                                                                                                            s.type,
-                                                                                                            line))
+                                                                                                                s.type,
+                                                                                                                line))
 
             elif self.input[0].identifier == 11:
                 self.input.pop(0)
-                s = self.is_declared(self.input[0].value)
-            #     self.check_procedure(expression)
-            #     temp = []
-            #     if self.is_declared(self.input[0]):
-            #         while self.input[0].identifier !=0:
-            #             temp.append(input[0])
-            #             self.input.pop(0)
-            #         self.check_parameters(temp)
-            # if self.input[0].identifier == 25:
-            #     if self.isdeclared(self.input[0]):
-            #         while self.input[0].identifier != 47:
+                param = []
+                expression = []
+                s = self.is_declared(self.input[0], 5)
+                line = self.input[0].line
+                expression = self.pop_line()
+                expression.pop(0)
+                while expression:
+                    type, expression = self.is_valid(expression, True)
+                    param.append(type)
+                self.check_procedure(s, param, line)
+
+            elif self.input[0].identifier == 12:
+                self.input.pop(0)
+                self.is_declared(self.input[0], 2)
             self.input.pop(0)
         self.scope = 0
+        self.clear_scope()
 
-    def is_declared(self, symbol):
+    def is_declared(self, symbol, category):
         for s in self.symbol_table:
-            if symbol.value == s.name and symbol.scope <= s.scope:
+            if category == 2 and s.category == 2 and s.scope == symbol.scope and s.name == symbol.value:
+                return s
+            elif category == 5 and symbol.value == s.name and s.category == category:
+                return s
+            elif category == 4 and symbol.value == s.name and s.scope <= symbol.scope:
                 return s
         else:
             raise Exception("Identificador '{0}' na linha {1} não declarado".format(symbol.value,
-                                                                                      self.input[0].line))
+                                                                                    self.input[0].line))
 
-    def check_procedure(self, expression):
-        name = expression[0].value
-        expression.pop(0)
-        call = []
-        procedure = []
+    def check_procedure(self, symbol, call_p, line):
+        procedure_p = []
+        for s in self.symbol_table:
+            if s.category == 6 and s.scope == symbol.scope:
+                procedure_p.append(s.type)
+        count_p = len(procedure_p)
+        count_c = len(call_p)
+        if count_p != count_c:
+            raise Exception("Quantidade de parametros declarada: {0}, quantidade esperada {1}".format(count_c, count_p))
+        for p, c in zip(procedure_p, call_p):
+            if p != c:
+                raise Exception("Tipo '{0}' declarado na linha {1}, tipo '{2}' esperado".format(c, p, line))
 
-        p = self.is_declared(name)
-        if p:
-            for s in self.symbol_table:
-                if s.category == 5 and s.scope == p.scope:
-                    procedure.append(s)
-
-    def is_valid(self, expression):
+    def is_valid(self, expression, param):
         type = None
         while expression:
             if expression[0].identifier == 25:
-                s = self.is_declared(expression[0])
+                s = self.is_declared(expression[0], 4)
                 if not type:
                     type = s.type
                 elif type != s.type:
@@ -159,12 +169,14 @@ class SemanticalAnalyzer:
                 elif type != 8:
                     raise Exception("Operação com tipos diferentes na linha {}".format(s.line))
             elif expression[0].identifier in [46, 47]:
+                expression.pop(0)
+                if param:
+                    return type, expression
                 return type
             expression.pop(0)
         raise Exception("Operação não identificada")
 
     def pop_line(self):
-        line = self.input[0].line
         expression = []
         while self.input[0].identifier != 47:
             expression.append(self.input[0])
