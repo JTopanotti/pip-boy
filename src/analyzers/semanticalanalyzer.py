@@ -182,6 +182,9 @@ class SemanticalAnalyzer:
     def pop_line(self):
         expression = []
         while self.input[0].identifier != 47:
+            if self.input[0].identifier == 7:
+                self.input.insert(0, Token(value=';', reserved=True))
+                continue
             expression.append(self.input[0])
             self.input.pop(0)
         expression.append(self.input[0])

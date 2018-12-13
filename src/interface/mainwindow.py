@@ -26,12 +26,12 @@ class MainWindow(QMainWindow):
 
         self.menu = self.menuBar()
         self.compile_act = QAction('Tokenize')
-        self.clear_act = QAction('Clear Tables')
+        self.clear_act = QAction('Reset Compiler')
         self.new_derivation_act = QAction('Derivation')
         self.proceed_act = QAction('Next')
         self.process_act = QAction('Process Syntax')
         self.compile_act.triggered.connect(self.compile)
-        self.clear_act.triggered.connect(self.clear_tables)
+        self.clear_act.triggered.connect(self.clear)
         self.proceed_act.triggered.connect(self.proceed)
         self.new_derivation_act.triggered.connect(self.new_derivation)
         self.process_act.triggered.connect(self.process)
@@ -93,18 +93,27 @@ class MainWindow(QMainWindow):
          except Exception as err:
              self.process_display.setText("Erro: {}".format(err))
 
+    def clear(self, table_name):
+
+        self.lexical_analyzer = LexicalAnalyzer()
+        self.syntaxical_analyzer = SyntaxicalAnalyzer()
+        self.syntaxical_analyzer.register_action(self.new_derivation_act)
+        self.semantical_analyzer = SemanticalAnalyzer()
+
+        self.clear_tables()
+
     def clear_table(self, table_name):
+
         table = self.automaton_table if table_name == "automaton_table" else self.derivation_table
         row_count = table.rowCount()
         while row_count > -1:
             table.removeRow(row_count)
             row_count -= 1
 
+
     def clear_tables(self):
         self.clear_table("automaton_table")
         self.clear_table("derivation_table")
-
-        self.syntaxical_analyzer.clear_cache()
 
     def proceed(self):
         try:
