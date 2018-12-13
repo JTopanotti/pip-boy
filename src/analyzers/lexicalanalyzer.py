@@ -191,8 +191,6 @@ class LexicalAnalyzer:
     def end_handler(self):
         if self.ident_buffer:
             self.register_identifier()
-        for token in self.tokens:
-            print(token.value, " : ", token.identifier, " : ", terminals[token.identifier])
 
     def register_number(self):
         value = self.value_buffer
@@ -241,7 +239,6 @@ class LexicalAnalyzer:
         while True:
             self.set_current_char()
             new_state = handler()
-            print(new_state)
             if new_state.upper() == self.end_state:
                 handler = self.handlers[new_state.upper()]
                 handler()

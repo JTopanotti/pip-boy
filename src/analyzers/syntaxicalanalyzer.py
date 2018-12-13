@@ -66,7 +66,6 @@ class SyntaxicalAnalyzer():
                     raise Exception(
                         "Derivacao para ({}, {}) nao foi encontrado na tabela de parsing".format(self.x, self.a))
             self.load_variables()
-            print(self.x)
         else:
             print("End of derivation")
 

@@ -1,6 +1,7 @@
 from models.symbol import Symbol
 from models.semanticflags import semanticdeclarations
 from models.semanticflags import semantictypes
+from models.token import Token
 
 
 class SemanticalAnalyzer:
@@ -33,7 +34,7 @@ class SemanticalAnalyzer:
             if self.input[0].identifier == 25:
                 symbol = Symbol()
                 symbol.scope = self.input[0].scope
-                symbol.name = self.input[0].value
+                symbol.name = self.input[0].value.upper()
                 symbol.line = self.input[0].line
                 if category in [2, 3]:
                     symbol.category = category
@@ -64,8 +65,9 @@ class SemanticalAnalyzer:
                 elif self.input[0].identifier == 6:
                     self.body_handler()
                 else:
-                    self.input.pop(0)
-            except Exception as err:
+                    if len(self.input) > 0:
+                        self.input.pop(0)
+            except IndexError as err:
                 raise Exception(err)
 
     def clear_scope(self):
@@ -130,12 +132,13 @@ class SemanticalAnalyzer:
         self.clear_scope()
 
     def is_declared(self, symbol, category):
+
         for s in self.symbol_table:
-            if category == 2 and s.category == 2 and s.scope == symbol.scope and s.name == symbol.value:
+            if category == 2 and s.category == 2 and s.scope == symbol.scope and s.name.upper() == symbol.value.upper():
                 return s
-            elif category == 5 and symbol.value == s.name and s.category == category:
+            elif category == 5 and symbol.value.upper() == s.name.upper() and s.category == category:
                 return s
-            elif category == 4 and symbol.value == s.name and s.scope <= symbol.scope:
+            elif category == 4 and symbol.value.upper() == s.name.upper() and s.scope <= symbol.scope:
                 return s
         else:
             raise Exception("Identificador '{0}' na linha {1} não declarado".format(symbol.value,
@@ -168,7 +171,7 @@ class SemanticalAnalyzer:
                     type = 8
                 elif type != 8:
                     raise Exception("Operação com tipos diferentes na linha {}".format(s.line))
-            elif expression[0].identifier in [46, 47]:
+            elif expression[0].identifier in [46, 47, 7]:
                 expression.pop(0)
                 if param:
                     return type, expression
